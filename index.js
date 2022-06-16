@@ -37,13 +37,12 @@ let User = mongoose.model('User', userSchema);
 
 app.get('/api/users/:id/logs', (req, res) => {
 
-  //let { from, to, limit } = req.query;
-
   let from = req.query.from || -1;
   let to = req.query.to || -1;
   let limit = req.query.limit || -1;
 
   //sanitize
+  
   if (limit != -1) {
     limit = Number.parseInt(limit);
     if (isNaN(limit)) {
@@ -59,9 +58,9 @@ app.get('/api/users/:id/logs', (req, res) => {
       return;
     }
     from = new Date(from);
-  } 
+  }
 
-  if (to !=-1) {
+  if (to != -1) {
 
     to = Date.parse(to);
     if (isNaN(to)) {
@@ -70,7 +69,7 @@ app.get('/api/users/:id/logs', (req, res) => {
     }
 
     to = new Date(to);
-  } 
+  }
 
   User.findById(req.params.id, (err, user) => {
 
@@ -79,27 +78,22 @@ app.get('/api/users/:id/logs', (req, res) => {
       return;
     }
 
-    console.log({ user: user, from: from, to: to, limit: limit })
-
     if (user) {
 
       let query = Exercise.where('user_id', user._id);
 
       //if from is set
       if (from != -1) {
-        console.log({ from: from })
         query = query.where('date').gte(from)
       }
 
       //if to is set
       if (to != -1) {
-        console.log({ to: to })
         query = query.where('date').lte(to)
       }
 
       //if limit is set
       if (limit != -1 && limit > 0) {
-        console.log({ limit: limit })
         query = query.limit(limit)
       }
 
@@ -123,10 +117,8 @@ app.get('/api/users/:id/logs', (req, res) => {
           }
 
           res.json({ _id: user._id, username: user.username, count: exercises.length, log: logs });
-          return;
         } else {
           res.json({ _id: user._id, username: user.username, count: 0, log: [] });
-          return;
         }
       });
     } else {
@@ -150,8 +142,7 @@ app.post('/api/users/:_id/exercises', (req, res) => {
         duration: req.body.duration
       });
 
-
-      if (req.body.date == '') {
+      if (req.body.date == undefined) {
         exercise.date = new Date();
       } else {
         let date = Date.parse(req.body.date);
@@ -166,7 +157,6 @@ app.post('/api/users/:_id/exercises', (req, res) => {
       exercise.save(function(err, rExercise) {
         //if error
         if (err) {
-          console.error(err);
           res.json({ error: 'unable to save data.' });
           return;
         }
